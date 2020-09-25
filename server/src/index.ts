@@ -8,6 +8,11 @@ import { __IS_PROD__ } from "./config";
 import mikroConfig from './mikro-orm.config';
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
+import { UserResolver } from "./resolvers/user";
+
+import redis from 'redis';
+import session from 'express-session';
+import connectRedis from 'connect-redis';
 
 
 const main = async () => {
@@ -16,12 +21,36 @@ const main = async () => {
 
   const app = express();
 
+  const RedisStore = connectRedis(session)
+  const redisClient = redis.createClient()
+
+  app.use(
+    session({
+      name: 'qid',
+      store: new RedisStore({
+        client: redisClient,
+        disableTTL: true
+      }),
+      secret: 'keyboard cat', // should be coming from env variable
+      resave: false,
+
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, // 10 years
+        httpOnly: true,
+        secure: __IS_PROD__,
+        sameSite: 'lax' // for csrf
+      }
+    })
+  )
+
+
   const apolloServer = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [HelloResolver, PostResolver],
+      resolvers: [HelloResolver, PostResolver, UserResolver],
       validate: false,
     }),
-    context: () => ({ em: orm.em })
+    context: ({ req, res }) => ({ em: orm.em, req, res })
   });
 
   apolloServer.applyMiddleware({ app });
