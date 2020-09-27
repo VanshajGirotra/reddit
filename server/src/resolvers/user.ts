@@ -2,7 +2,7 @@ import { Resolver, Mutation, Arg, Field, InputType, Ctx, ObjectType } from "type
 import { MyContext } from "../types";
 import { User } from "../entities/User";
 import argon2 from 'argon2';
-
+import { EntityManager } from '@mikro-orm/postgresql';
 @InputType()
 class UserNamePasswordInput {
   @Field()
@@ -36,17 +36,56 @@ export class UserResolver {
     @Arg('options') options: UserNamePasswordInput,
     @Ctx() { em, req }: MyContext
   ): Promise<UserResponse> {
+
+    if (options.username.length < 3) {
+      return {
+        errors: [
+          {
+            field: 'username',
+            message: 'length of username cannot be less than 3'
+          }
+        ]
+      }
+    }
+
+    if (options.password.length < 3) {
+      return {
+        errors: [
+          {
+            field: 'password',
+            message: 'length of password cannot be less than 3'
+          }
+        ]
+      }
+    }
+
     const hashed_password = await argon2.hash(options.password)
-    const user = em.create(User, { username: options.username, password: hashed_password })
+    let user;
     try {
-      await em.persistAndFlush(user)
+      const result = await (em as EntityManager).createQueryBuilder(User).getKnexQuery().insert({
+        username: options.username,
+        password: hashed_password,
+        created_at: new Date(),
+        updated_at: new Date()
+      }).returning('*');
+
+      user = result[0]
+
     } catch (err) {
-      if
-        (err.code === '23505') {  // duplicate username
+
+      if (err.code === '23505') {  // duplicate username
         return {
           errors: [{
             field: 'username',
             message: 'username already exists'
+          }]
+        }
+      } else {
+        console.log("error", err);
+        return {
+          errors: [{
+            field: 'unknown',
+            message: 'something went wrong'
           }]
         }
       }
