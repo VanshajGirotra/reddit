@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Arg, Field, InputType, Ctx, ObjectType } from "type-graphql";
+import { Resolver, Mutation, Arg, Field, InputType, Ctx, ObjectType, Query } from "type-graphql";
 import { MyContext } from "../types";
 import { User } from "../entities/User";
 import argon2 from 'argon2';
@@ -100,7 +100,7 @@ export class UserResolver {
     }
   }
 
-  @Mutation(() => User, { nullable: true })
+  @Query(() => User, { nullable: true })
   async me(
     @Ctx() { req, em }: MyContext
   ): Promise<User | null> {
