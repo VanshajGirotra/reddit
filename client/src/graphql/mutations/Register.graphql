@@ -5,7 +5,7 @@ mutation Register($username: String!, $password: String!) {
       field
     }
     user {
-      username
+      ...UserFragment
     }
   }
 }

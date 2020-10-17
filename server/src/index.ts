@@ -4,7 +4,7 @@ import express from 'express';
 import { ApolloServer } from "apollo-server-express";
 import { buildSchema } from 'type-graphql';
 
-import { __IS_PROD__ } from "./config";
+import { IDENTITY_COOKIE, __IS_PROD__ } from "./config";
 import mikroConfig from './mikro-orm.config';
 import { HelloResolver } from "./resolvers/hello";
 import { PostResolver } from "./resolvers/post";
@@ -34,7 +34,7 @@ const main = async () => {
 
   app.use(
     session({
-      name: 'qid',
+      name: IDENTITY_COOKIE,
       store: new RedisStore({
         client: redisClient,
         disableTTL: true

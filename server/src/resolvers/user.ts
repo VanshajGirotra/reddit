@@ -3,6 +3,7 @@ import { MyContext } from "../types";
 import { User } from "../entities/User";
 import argon2 from 'argon2';
 import { EntityManager } from '@mikro-orm/postgresql';
+import { IDENTITY_COOKIE } from "../config";
 @InputType()
 class UserNamePasswordInput {
   @Field()
@@ -143,4 +144,19 @@ export class UserResolver {
     }
   }
 
+  @Mutation (() => Boolean) 
+  logout(
+    @Ctx() { req, res}: MyContext
+  ): Promise<Boolean> {
+    return new Promise(resolve => {
+      res.clearCookie(IDENTITY_COOKIE)
+      req.session.destroy((error) => {
+        if (error) {
+          console.log("error in logout", error.message);
+          resolve(false)
+        }
+        resolve(true)
+      })
+    }) 
+  }
 }
