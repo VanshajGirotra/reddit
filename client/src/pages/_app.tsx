@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: any) {
     exchanges: [dedupExchange, cacheExchange({
       updates: {
         Mutation: {
-          logout: (_result, args, cache, info) => {
+          logout: (_result, _args, cache, _info) => {
             typedUpdateQuery<LogoutMutation, MeQuery>(
               cache,
               { query: MeDocument },
@@ -28,7 +28,7 @@ function MyApp({ Component, pageProps }: any) {
               () => ({ me: null })
             )
           },
-          login: (_result, args, cache, info) => {
+          login: (_result, _args, cache, _info) => {
             typedUpdateQuery<LoginMutation, MeQuery>(cache,
               { query: MeDocument },
               _result,
@@ -40,7 +40,7 @@ function MyApp({ Component, pageProps }: any) {
                 }
               })
           },
-          register: (_result, args, cache, info) => {
+          register: (_result, _args, cache, _info) => {
             typedUpdateQuery<RegisterMutation, MeQuery>(cache,
               { query: MeDocument },
               _result,
