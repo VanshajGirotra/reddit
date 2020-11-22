@@ -1,4 +1,5 @@
 fragment UserFragment on User {
   username
+  email 
   id
 }
